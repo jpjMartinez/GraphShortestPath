@@ -4,15 +4,14 @@
 #include <time.h>
 #include "graph.h"
 #include "fila.h"
+#include "map_matrix.h"
 
  
 struct graph
 { 
     int num_v;
     Vert **list_vert;  
-    
-    char **map_matrix;     // map with vertices costs
-    int map_dimensions[2]; // rowls, cols
+    MapMatrix *map_matrix;
 };
 
 
