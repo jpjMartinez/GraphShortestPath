@@ -38,12 +38,12 @@ void make_everything(void)
 
     /* =================================== Cria o grafo ================================ */
 
-    Graph *g = create_graph(3280, matrix);
+    Graph *g = create_graph("mapa.txt");
 
 
     /* ==================== Constroi as Listas de Adjacencias de cada Nó =============== */
 
-    insert_vertices_neighbors(g, matrix);
+    insert_vertices_neighbors(g);
 
 
     /* ======================== Verifica se Todas as Arestas Existem =================== */
@@ -84,21 +84,31 @@ void make_everything(void)
 }
 
 
-
 int main (void)
 {
     //make_everything();
 
 
-    MapMatrix *map_matrix = create_map_matrix("mapa.txt");
+    /* =================================== Cria o grafo ================================ */
 
-    print_map_matrix(map_matrix);
+    Graph *g = create_graph("mapa.txt");
 
-    get_map_matrix_dimensions(map_matrix);
 
-    free_map_matrix(map_matrix);
+    /* ==================== Constroi as Listas de Adjacencias de cada Nó =============== */
 
+    insert_vertices_neighbors(g);    
+
+
+    /* ======================== Mostra Adjacencias de Cada Vertice ===================== */
+
+    show_graph_vertices(g);
+
+
+    /* ================================= Destroi o grafo =============================== */
+
+    free_graph(g);
     
+
     printf("hello world\n");
 
     return 0;

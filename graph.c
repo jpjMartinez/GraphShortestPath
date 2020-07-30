@@ -22,34 +22,47 @@ struct vertice
 };
 
 
-Graph * create_graph(int num_vertices, char matriz[40][82])
+Graph * create_graph(char *map_file)
 {
     int i, j, k;
 
-    Graph *g = (Graph *) malloc(sizeof(Graph));
-    Vert **lst_vert = (Vert **) malloc(num_vertices * sizeof(Vert *));
+    Graph *g = (Graph *) malloc(sizeof(Graph));   
+    MapMatrix *map_matrix = create_map_matrix(map_file);
+    if (g == NULL || map_matrix == NULL) { exit(1); }
 
-    if (g == NULL || lst_vert == NULL) { exit(1); }
+    g->num_v = get_matrix_rows(map_matrix) * get_matrix_cols(map_matrix);
+    g->map_matrix = map_matrix;
 
-    g->num_v = num_vertices;   
+
+    Vert **lst_vert = (Vert **) malloc(g->num_v * sizeof(Vert *));
+    if (lst_vert == NULL) { exit(1); }
+    
     g->list_vert = lst_vert;
+    
 
-    j = 0; k = 0;
+    k = 0;
 
-    for (i = 0; i < g->num_v; i++)
-    {
-        g->list_vert[i] = create_vertice(matriz[j][k]);
-        
-        if (k + 1 == 82)
+    for (i = 0; i < get_matrix_rows(g->map_matrix); i++)
+        for (j = 0; j < get_matrix_cols(g->map_matrix); j++)
         {
-            k = 0;
-            j++;
-        }
-
-        else { k++; }            
-    }
+            g->list_vert[k] = create_vertice(get_matrix(map_matrix)[i][j]);
+            k++;
+        }       
         
     return g;
+}
+
+
+void free_graph(Graph *g)
+{
+    for (int i = 0; i < g->num_v; i++) // libera cada vértice e suas adjacencias
+        free_vertice(g->list_vert[i]);
+
+    free(g->list_vert); // libera a lista de adjacencias que endereçava cada vertice
+
+    free_map_matrix(g->map_matrix); // libera o mapa usado para construir o grafo
+
+    free(g);
 }
 
 
@@ -65,6 +78,55 @@ Vert * create_vertice(char info)
         v->neighbors[i] = -1;
 
     return v;
+}
+
+
+void free_vertice(Vert *v)
+{
+    free(v);
+}
+
+
+void insert_vertices_neighbors(Graph *g)
+{
+    int i, j, k;    
+    j = 0; k = 0; 
+
+
+    for (i = 0; i < g->num_v; i++)
+    {   
+        /* --------------- Define o CIMA do vértice ------------------ */
+
+        if (j - 1 >= 0)
+            g->list_vert[i]->neighbors[0] = get_matrix_aux(g->map_matrix)[j-1][k];     
+
+
+        /* --------------- Define o BAIXO do vértice ------------------ */
+
+        if (j + 1 < get_matrix_rows(g->map_matrix))
+            g->list_vert[i]->neighbors[1] = get_matrix_aux(g->map_matrix)[j+1][k]; 
+
+
+        /* --------------- Define o ESQUERDA do vértice ------------------ */
+
+        if (k - 1 >= 0)
+            g->list_vert[i]->neighbors[2] = get_matrix_aux(g->map_matrix)[j][k-1];    
+
+
+        /* --------------- Define o DIREITA do vértice ------------------ */
+
+        if (k + 1 < get_matrix_rows(g->map_matrix))
+            g->list_vert[i]->neighbors[3] = get_matrix_aux(g->map_matrix)[j][k+1];                     
+     
+        
+        if (k + 1 == get_matrix_cols(g->map_matrix))
+        {
+            k = 0;
+            j++;
+        }
+
+        else { k++; }            
+    }
 }
 
 
@@ -93,56 +155,7 @@ void show_graph_vertices(Graph *g)
 }
 
 
-void insert_vertices_neighbors(Graph *g, char matriz[40][82])
-{
-    int i, j, k, cont;
-    int matrix_aux[40][82];
 
-    cont = 0;
-
-    for (i = 0; i < 40; i++)
-        for (j = 0; j < 82; j++)
-            matrix_aux[i][j] = cont++;       
-
-
-    j = 0; k = 0; 
-
-
-    for (i = 0; i < g->num_v; i++)
-    {   
-        /* --------------- Define o CIMA do vértice ------------------ */
-
-        if (j - 1 >= 0)
-            g->list_vert[i]->neighbors[0] = matrix_aux[j-1][k];     
-
-
-        /* --------------- Define o BAIXO do vértice ------------------ */
-
-        if (j + 1 < 40)
-            g->list_vert[i]->neighbors[1] = matrix_aux[j+1][k]; 
-
-
-        /* --------------- Define o ESQUERDA do vértice ------------------ */
-
-        if (k - 1 >= 0)
-            g->list_vert[i]->neighbors[2] = matrix_aux[j][k-1];    
-
-
-        /* --------------- Define o DIREITA do vértice ------------------ */
-
-        if (k + 1 < 82)
-            g->list_vert[i]->neighbors[3] = matrix_aux[j][k+1];                     
-     
-        
-        if (k + 1 == 82)
-        {
-            k = 0;
-            j++;
-        }
-
-        else { k++; }            
-    }
-}
 
 
 int verify_graph_edges_amount(Graph *g, int rows, int cols)
@@ -171,22 +184,6 @@ int verify_graph_edges_amount(Graph *g, int rows, int cols)
         return 1;
 
     return 0;    
-}
-
-
-void free_vertice(Vert *v)
-{
-    free(v);
-}
-
-
-void free_graph(Graph *g)
-{
-    int i;
-    for (i = 0; i < g->num_v; i++)
-        free_vertice(g->list_vert[i]);
-
-    free(g);
 }
 
 
