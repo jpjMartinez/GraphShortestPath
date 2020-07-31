@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "graph.h"
-#include "map_matrix.h"
-
 
 
 
@@ -23,6 +21,7 @@ int main (void)
     //show_graph_vertices(g);
 
 
+
     /* ======================== Verifica se Todas as Arestas Existem =================== */
     
     if (verify_graph_edges_amount(g)) 
@@ -39,7 +38,7 @@ int main (void)
 
     /* ======================= Algoritmo Dijkstra - Caminho Mais Curto ================= */
 
-    //dijkstra_shortest_path(g, matrix);
+    dijkstra_shortest_path(g);
     printf("\n\n");
 
 
@@ -53,11 +52,6 @@ int main (void)
 
     //floyd_warshall_shortest_path(g, matrix);
     printf("\n\n");
-
-
-
-
-
 
 
     /* ================================= Destroi o grafo =============================== */

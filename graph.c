@@ -187,102 +187,6 @@ int verify_graph_edges_amount(Graph *g)
 }
 
 
-
-
-
-
-int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_len)
-{
-    int i;
-    for (i = 0; i < lst_len; i++)
-        if (vert == lst_shortest_path_vertices[i])
-            return 1;
-    return 0;
-}
-
-
-void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin, char matrix[40][82])
-{
-    int i, j, cont, parent, lst_parents_len;
-    int matrix_aux[40][82];
-    int *lst_parents;
-    
-
-    cont = 0;
-
-    /* Preenche matriz auxiliar com numeros de 0 à 3279
-       para mapear os elementos percorridos no CMC
-    */
-
-    for (i = 0; i < 40; i++)
-        for (j = 0; j < 82; j++)
-            matrix_aux[i][j] = cont++;
-
-
-    /* Descobre quem são os parentes e coloca eles em fila */
-
-    Fila *f = create_fila();
-    cont = 0;
-
-    parent = parents[end];
-
-    while(parent != origin)
-    {
-        insert_fila(f, parent);
-        parent = parents[parent];
-        cont++;
-    }
-
-    /* Aloca um vetor apenas para os parentes que foram 
-       enfileirados anteriormente
-    */
-
-    lst_parents = (int *) malloc(cont * sizeof(int)); 
-    if (lst_parents == NULL) { exit(1); }
-    lst_parents_len = cont;
-
-    cont = 0; 
-    
-    while (!fila_is_empty(f)) /* Preenche o vetor lst_parents */
-    {
-        lst_parents[cont] = remove_fila(f);
-        cont++;
-    }
-
-
-    printf("==================== CAMINHO PERCORRIDO =====================\n");
-
-    for (i = 0; i < 40; i++)
-    {
-        for (j = 0; j < 82; j++)
-        {
-            if (is_a_shortest_path_vert(matrix_aux[i][j], lst_parents, lst_parents_len)) // Mostra X para os Vértices Percorridos
-            {
-                if (j + 1 == 82)
-                    printf("_ \n");
-                else
-                    printf("_ ");
-
-                remove_fila(f);
-            }
-
-            else // Mostra o simbolo normal dos Vértices Não Percorridos 
-            {
-                if (j + 1 == 82)
-                    printf("%c \n", matrix[i][j]);
-                else
-                    printf("%c ", matrix[i][j]);                
-            }
-        }
-    }       
-
-
-    /* libera o espaço alocado anteriormente para a fila e lista de 'parents'  */
-    free_fila(f);
-    free(lst_parents);
-}
-
-
 int calculate_edge_cost(char info)
 {
     if (info == 'M')
@@ -305,7 +209,51 @@ int calculate_edge_cost(char info)
 } 
 
 
-void rec_dfs_dijkstra(int origin, Graph *g, int *steps, int *visited, int *distances, int *parents)
+void dijkstra_shortest_path(Graph *g)
+{   
+    /* Inicia a Contagem de Tempo da Execução da Função */
+
+    clock_t t = clock();
+
+    int i, origin, end;
+    int visited[g->num_v];
+    int distances[g->num_v];
+    int parents[g->num_v]; 
+    int steps = 0;
+
+
+    for (i = 0; i < g->num_v; i++)
+    {
+        if (g->list_vert[i]->info == 'I') {  origin = i; }
+        else if (g->list_vert[i]->info == 'F') { end = i; }
+        distances[i] = INT_MAX;
+        visited[i] = 0;
+    }       
+    
+    distances[origin] = 0;
+    parents[origin] = -1;
+  
+
+    rec_dfs_dijkstra(g, origin, &steps, visited, distances, parents);
+
+
+    /* Calcula o tempo usado para encontrar o CMC */
+
+    t = clock() - t;
+
+    printf("\n================== Consegui rodar o Dijkstra!!! =====================\n");
+    printf("Custo do Caminho Mais Curto (CMC): %d\n", distances[end]);
+    printf("Numero de vertices visitados: %d\n", steps);
+    printf("Tempo em %f segundos\n\n", ((double)t)/CLOCKS_PER_SEC);
+
+    
+    /* Mostra o CMC encontrado pelo algoritmo */
+
+    show_shortest_path_DJKT_A_star(g, parents, end, origin);
+}
+
+
+void rec_dfs_dijkstra(Graph *g, int origin, int *steps, int *visited, int *distances, int *parents)
 {
     int i, neighbor_index, edge_cost, next_vertice;
     int shortest_added_distance = INT_MAX;
@@ -348,52 +296,104 @@ void rec_dfs_dijkstra(int origin, Graph *g, int *steps, int *visited, int *dista
     */
     
     if (shortest_added_distance != INT_MAX)
-        rec_dfs_dijkstra(next_vertice, g, steps, visited, distances, parents);          
+        rec_dfs_dijkstra(g, next_vertice, steps, visited, distances, parents);          
 }
 
 
-void dijkstra_shortest_path(Graph *g, char matrix[40][82])
-{   
-    /* Inicia a Contagem de Tempo da Execução da Função */
+void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
+{
+    int cont, parent, lst_parents_len, vertice, rows, cols;
+    int *lst_parents;
 
-    clock_t t = clock();
+    rows = get_matrix_rows(g->map_matrix);
+    cols = get_matrix_cols(g->map_matrix);
+    
 
-    int i, origin, end;
-    int visited[g->num_v];
-    int distances[g->num_v];
-    int parents[g->num_v]; 
-    int steps = 0;
+    /* Descobre quem são os parentes e coloca eles em fila */
 
+    Fila *f = create_fila();
+    cont = 0;
 
-    for (i = 0; i < g->num_v; i++)
+    parent = parents[end];
+
+    while(parent != origin)
     {
-        if (g->list_vert[i]->info == 'I') {  origin = i; }
-        else if (g->list_vert[i]->info == 'F') { end = i; }
-        distances[i] = INT_MAX;
-        visited[i] = 0;
+        insert_fila(f, parent);
+        parent = parents[parent];
+        cont++;
+    }
+
+
+    /* Aloca um vetor apenas para os parentes que foram 
+       enfileirados anteriormente
+    */
+
+    lst_parents = (int *) malloc(cont * sizeof(int)); 
+    if (lst_parents == NULL) { exit(1); }
+    lst_parents_len = cont;
+
+    cont = 0; 
+    
+    while (!fila_is_empty(f)) /* Preenche o vetor lst_parents */
+    {
+        lst_parents[cont] = remove_fila(f);
+        cont++;
+    }
+
+
+    printf("==================== CAMINHO PERCORRIDO =====================\n");
+
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            vertice = get_matrix_aux(g->map_matrix)[i][j];
+
+            if (is_a_shortest_path_vert(vertice, lst_parents, lst_parents_len)) // Mostra X para os Vértices Percorridos
+            {
+                if (j + 1 == cols)
+                    printf("_ \n");
+                else
+                    printf("_ ");
+
+                remove_fila(f);
+            }
+
+            else // Mostra o simbolo normal dos Vértices Não Percorridos 
+            {
+                vertice = get_matrix(g->map_matrix)[i][j];
+
+                if (j + 1 == cols)
+                    printf("%c \n", vertice);
+                else
+                    printf("%c ", vertice);                
+            }
+        }
     }       
-    
-    distances[origin] = 0;
-    parents[origin] = -1;
-  
-
-    rec_dfs_dijkstra(origin, g, &steps, visited, distances, parents);
 
 
-    /* Calcula o tempo usado para encontrar o CMC */
+    /* libera o espaço alocado anteriormente para a 
+       fila e lista de 'parents'  
+    */
 
-    t = clock() - t;
-
-    printf("\n================== Consegui rodar o Dijkstra!!! =====================\n");
-    printf("Custo do Caminho Mais Curto (CMC): %d\n", distances[end]);
-    printf("Numero de vertices visitados: %d\n", steps);
-    printf("Tempo em %f segundos\n\n", ((double)t)/CLOCKS_PER_SEC);
-
-    
-    /* Mostra o CMC encontrado pelo algoritmo */
-
-    show_shortest_path_DJKT_A_star(g, parents, end, origin, matrix);
+    free_fila(f);
+    free(lst_parents);
 }
+
+
+int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_len)
+{
+    int i;
+    for (i = 0; i < lst_len; i++)
+        if (vert == lst_shortest_path_vertices[i])
+            return 1;
+    return 0;
+}
+
+
+
+
+
 
 
 int calculate_heuristic(int neighbor, int destiny)
@@ -527,7 +527,7 @@ void a_star_shortest_path(Graph *g, char matrix[40][82])
 
     /* Mostra o CMC encontrado pelo algoritmo */
 
-    show_shortest_path_DJKT_A_star(g, parents, end, origin, matrix);
+    show_shortest_path_DJKT_A_star(g, parents, end, origin);
 }
 
 
