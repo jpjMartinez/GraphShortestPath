@@ -4,38 +4,10 @@
 #include "map_matrix.h"
 
 
-void make_everything(void)
+
+
+int main (void)
 {
-    /*============ Le o arquivo mapa.txt e o transforma em uma matriz 40x82 ============ */
-
-    FILE *map;
-    char ch;
-    int row = 0;
-    int col = 0;
-    char matrix[40][82];
-
-
-    map = fopen("mapa.txt", "r");
-    if (map == NULL) { exit(1); }          
-
-    while ((ch = fgetc(map)) != EOF)
-    {
-        if (ch != '\n')
-        {
-            matrix[row][col] = ch;
-            col++;
-        }   
-
-        else
-        {
-            row++;
-            col = 0;
-        }                                   
-    }
-
-    fclose(map);
-
-
     /* =================================== Cria o grafo ================================ */
 
     Graph *g = create_graph("mapa.txt");
@@ -43,12 +15,17 @@ void make_everything(void)
 
     /* ==================== Constroi as Listas de Adjacencias de cada Nó =============== */
 
-    insert_vertices_neighbors(g);
+    insert_vertices_neighbors(g);    
+
+
+    /* ======================== Mostra Adjacencias de Cada Vertice ===================== */
+
+    //show_graph_vertices(g);
 
 
     /* ======================== Verifica se Todas as Arestas Existem =================== */
     
-    if (verify_graph_edges_amount(g, 40, 82)) 
+    if (verify_graph_edges_amount(g)) 
         printf("Esta tudo OK com as arestas\n");
     else
         printf("Teve algum erro!\n"); 
@@ -62,7 +39,7 @@ void make_everything(void)
 
     /* ======================= Algoritmo Dijkstra - Caminho Mais Curto ================= */
 
-    dijkstra_shortest_path(g, matrix);
+    //dijkstra_shortest_path(g, matrix);
     printf("\n\n");
 
 
@@ -76,32 +53,11 @@ void make_everything(void)
 
     //floyd_warshall_shortest_path(g, matrix);
     printf("\n\n");
-    
-
-    /* ================================= Destroi o grafo =============================== */
-
-    free_graph(g);
-}
 
 
-int main (void)
-{
-    //make_everything();
 
 
-    /* =================================== Cria o grafo ================================ */
 
-    Graph *g = create_graph("mapa.txt");
-
-
-    /* ==================== Constroi as Listas de Adjacencias de cada Nó =============== */
-
-    insert_vertices_neighbors(g);    
-
-
-    /* ======================== Mostra Adjacencias de Cada Vertice ===================== */
-
-    show_graph_vertices(g);
 
 
     /* ================================= Destroi o grafo =============================== */

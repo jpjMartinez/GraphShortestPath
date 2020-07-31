@@ -115,7 +115,7 @@ void insert_vertices_neighbors(Graph *g)
 
         /* --------------- Define o DIREITA do vértice ------------------ */
 
-        if (k + 1 < get_matrix_rows(g->map_matrix))
+        if (k + 1 < get_matrix_cols(g->map_matrix))
             g->list_vert[i]->neighbors[3] = get_matrix_aux(g->map_matrix)[j][k+1];                     
      
         
@@ -155,13 +155,13 @@ void show_graph_vertices(Graph *g)
 }
 
 
-
-
-
-int verify_graph_edges_amount(Graph *g, int rows, int cols)
+int verify_graph_edges_amount(Graph *g)
 {
-    int i, j;
+    int i, j, rows, cols;
     int exepected_pos[4];
+
+    rows = get_matrix_rows(g->map_matrix);
+    cols = get_matrix_cols(g->map_matrix);
 
     exepected_pos[0] = cols*(rows - 1);
     exepected_pos[1] = exepected_pos[0];
@@ -185,6 +185,10 @@ int verify_graph_edges_amount(Graph *g, int rows, int cols)
 
     return 0;    
 }
+
+
+
+
 
 
 int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_len)

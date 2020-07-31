@@ -1,23 +1,17 @@
 typedef struct graph Graph;
-
 typedef struct vertice Vert;
 
 Graph * create_graph(char *map_file);
-
 void free_graph(Graph *g);
 
 Vert * create_vertice(char info);
-
 void free_vertice(Vert *v);
 
 void insert_vertices_neighbors(Graph *g);
-
 void show_graph_vertices(Graph *g);
+int verify_graph_edges_amount(Graph *g);
 
 
-
-
-int verify_graph_edges_amount(Graph *g, int rows, int cols);
 
 int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int len);
 
