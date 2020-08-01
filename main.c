@@ -136,6 +136,8 @@ void cmp_linar_binary_search(void)
 int main (void)
 {
     //do_everything();
+
+    cmp_linar_binary_search();
     
     printf("hello world\n");
 

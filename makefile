@@ -1,3 +1,20 @@
+# Cabecalho para todos os Makefiles
+
+ifeq ($(OS),Windows_NT) 
+RM = del /Q /F
+CP = copy /Y
+ifdef ComSpec
+SHELL := $(ComSpec)
+endif
+ifdef COMSPEC
+SHELL := $(COMSPEC)
+endif
+else
+RM = rm -rf
+CP = cp -f
+endif
+
+
 # Name of the project
 PROJ_NAME=trab3
 
@@ -13,10 +30,9 @@ OBJ=$(C_SOURCE:.c=.o)
 # Compiler
 CC=gcc
 
-# Flags for compiler
-CC_FLAGS=-c         \
-         -W         \
-         -Wall      
+# Flags for compiler; Add -W and -Wall to see better warnings
+CC_FLAGS=-c           
+
 
 #
 # Compilation and linking
@@ -33,4 +49,6 @@ main.o: main.c $(H_SOURCE)
 	$(CC) -o $@ $< $(CC_FLAGS)
 
 clean:
-	rm -rf *.o $(PROJ_NAME) *~
+	-$(RM) *.o
+
+.PHONY: all clean
