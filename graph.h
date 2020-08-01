@@ -21,6 +21,9 @@ int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int len);
 int verify_vertice_neighborhood(Graph *g, int vert_index, int possible_neighbor);
 
 
+
+
+
 int calculate_heuristic(int neighbor, int destiny);
 
 void rec_dfs_a_star(int origin, int end, Graph *g, int *steps, int *visited, int *distances, int *parents);

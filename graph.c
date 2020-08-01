@@ -5,6 +5,7 @@
 #include "graph.h"
 #include "fila.h"
 #include "map_matrix.h"
+#include "algorithms.h"
 
  
 struct graph
@@ -341,6 +342,11 @@ void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
     }
 
 
+    /* Coloca os elementos do vetor em ordem crescente */
+
+    quick_sort(lst_parents, 0, lst_parents_len-1);
+
+
     printf("==================== CAMINHO PERCORRIDO =====================\n");
 
     for (int i = 0; i < rows; i++)
@@ -392,13 +398,9 @@ int verify_vertice_neighborhood(Graph *g, int vert_index, int possible_neighbor)
 
 int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_len)
 {
-    int i;
-    for (i = 0; i < lst_len; i++)
-        if (vert == lst_shortest_path_vertices[i])
-            return 1;
-    return 0;
-
-    //return binary_search(vert, lst_shortest_path_vertices, lst_len);
+    //int index = linear_search(vert, lst_shortest_path_vertices, lst_len);
+    int index = binary_search(vert, lst_shortest_path_vertices, lst_len);
+    return (index != -1) ? 1 : 0;    
 }
 
 
