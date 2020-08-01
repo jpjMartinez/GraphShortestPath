@@ -344,12 +344,13 @@ void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
     printf("==================== CAMINHO PERCORRIDO =====================\n");
 
     for (int i = 0; i < rows; i++)
-    {
         for (int j = 0; j < cols; j++)
         {
             vertice = get_matrix_aux(g->map_matrix)[i][j];
 
-            if (is_a_shortest_path_vert(vertice, lst_parents, lst_parents_len)) // Mostra X para os Vértices Percorridos
+            // Mostra X para os Vértices Percorridos
+
+            if (is_a_shortest_path_vert(vertice, lst_parents, lst_parents_len)) 
             {
                 if (j + 1 == cols)
                     printf("_ \n");
@@ -368,8 +369,7 @@ void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
                 else
                     printf("%c ", vertice);                
             }
-        }
-    }       
+        }       
 
 
     /* libera o espaço alocado anteriormente para a 
@@ -381,6 +381,15 @@ void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
 }
 
 
+int verify_vertice_neighborhood(Graph *g, int vert_index, int possible_neighbor)
+{
+    for (int i = 0; i < 4; i++)
+        if (g->list_vert[vert_index]->neighbors[i] == possible_neighbor)
+            return 1;
+    return 0;
+}
+
+
 int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_len)
 {
     int i;
@@ -388,7 +397,10 @@ int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_l
         if (vert == lst_shortest_path_vertices[i])
             return 1;
     return 0;
+
+    //return binary_search(vert, lst_shortest_path_vertices, lst_len);
 }
+
 
 
 
@@ -531,14 +543,7 @@ void a_star_shortest_path(Graph *g, char matrix[40][82])
 }
 
 
-int verify_vertice_neighborhood(Graph *g, int vertice, int possible_neighbor)
-{
-    int i;
-    for (i = 0; i < 4; i++)
-        if (g->list_vert[vertice]->neighbors[i] == possible_neighbor)
-            return 1;
-    return 0;
-}
+
 
 
 void show_shortest_path_FW(int **next_vert_matrix, int origin, int end, char matrix[40][82])

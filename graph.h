@@ -18,7 +18,7 @@ void rec_dfs_dijkstra(Graph *g, int origin, int *steps, int *visited, int *dista
 void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin);
 int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int len);
 
-
+int verify_vertice_neighborhood(Graph *g, int vert_index, int possible_neighbor);
 
 
 int calculate_heuristic(int neighbor, int destiny);
@@ -27,7 +27,7 @@ void rec_dfs_a_star(int origin, int end, Graph *g, int *steps, int *visited, int
 
 void a_star_shortest_path(Graph *g, char matrix[40][82]);
 
-int verify_vertice_neighborhood(Graph *g, int vertice, int possible_neighbor);
+
 
 void show_shortest_path_FW(int **next_vert_matrix, int origin, int end, char matrix[40][82]);
 
