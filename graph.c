@@ -25,8 +25,6 @@ struct vertice
 
 Graph * create_graph(char *map_file)
 {
-    int i, j, k;
-
     Graph *g = (Graph *) malloc(sizeof(Graph));   
     MapMatrix *map_matrix = create_map_matrix(map_file);
     if (g == NULL || map_matrix == NULL) { exit(1); }
@@ -41,15 +39,12 @@ Graph * create_graph(char *map_file)
     g->list_vert = lst_vert;
     
 
-    k = 0;
+    int k = 0;
 
-    for (i = 0; i < get_matrix_rows(g->map_matrix); i++)
-        for (j = 0; j < get_matrix_cols(g->map_matrix); j++)
-        {
-            g->list_vert[k] = create_vertice(get_matrix(map_matrix)[i][j]);
-            k++;
-        }       
-        
+    for (int i = 0; i < get_matrix_rows(g->map_matrix); i++)
+        for (int j = 0; j < get_matrix_cols(g->map_matrix); j++)
+            g->list_vert[k++] = create_vertice(get_matrix(map_matrix)[i][j]);
+     
     return g;
 }
 
@@ -74,8 +69,7 @@ Vert * create_vertice(char info)
 
     v->info = info;
 
-    int i;
-    for (i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
         v->neighbors[i] = -1;
 
     return v;
@@ -90,11 +84,11 @@ void free_vertice(Vert *v)
 
 void insert_vertices_neighbors(Graph *g)
 {
-    int i, j, k;    
-    j = 0; k = 0; 
+    int j, k;    
+    j = 0; k = 0;
 
 
-    for (i = 0; i < g->num_v; i++)
+    for (int i = 0; i < g->num_v; i++)
     {   
         /* --------------- Define o CIMA do vértice ------------------ */
 
@@ -158,7 +152,7 @@ void show_graph_vertices(Graph *g)
 
 int verify_graph_edges_amount(Graph *g)
 {
-    int i, j, rows, cols;
+    int rows, cols;
     int exepected_pos[4];
 
     rows = get_matrix_rows(g->map_matrix);
@@ -172,8 +166,8 @@ int verify_graph_edges_amount(Graph *g)
     int qtd_pos_found[4] = {0, 0, 0, 0};
                         /*up, down, left, right */
 
-    for (i = 0; i < g->num_v; i++)
-        for (j = 0; j < 4; j++)
+    for (int i = 0; i < g->num_v; i++)
+        for (int j = 0; j < 4; j++)
             if (g->list_vert[i]->neighbors[j] != -1)
                 qtd_pos_found[j]++;
 
@@ -188,116 +182,10 @@ int verify_graph_edges_amount(Graph *g)
 }
 
 
-int calculate_edge_cost(char info)
+int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_len)
 {
-    if (info == 'M')
-        return 100;
-    
-    else if (info == 'R')
-        return 5;
-
-    else if (info == '.')
-        return 1;
-
-    else if (info == 'F' || info == 'I')
-        return 0;
-
-    else
-    {
-        printf("Mapa possui simbolos diferentes de 'M', 'R' e '.'");
-        exit(1);
-    }    
-} 
-
-
-void dijkstra_shortest_path(Graph *g)
-{   
-    /* Inicia a Contagem de Tempo da Execução da Função */
-
-    clock_t t = clock();
-
-    int i, origin, end;
-    int visited[g->num_v];
-    int distances[g->num_v];
-    int parents[g->num_v]; 
-    int steps = 0;
-
-
-    for (i = 0; i < g->num_v; i++)
-    {
-        if (g->list_vert[i]->info == 'I') {  origin = i; }
-        else if (g->list_vert[i]->info == 'F') { end = i; }
-        distances[i] = INT_MAX;
-        visited[i] = 0;
-    }       
-    
-    distances[origin] = 0;
-    parents[origin] = -1;
-  
-
-    rec_dfs_dijkstra(g, origin, &steps, visited, distances, parents);
-
-
-    /* Calcula o tempo usado para encontrar o CMC */
-
-    t = clock() - t;
-
-    printf("\n================== Consegui rodar o Dijkstra!!! =====================\n");
-    printf("Custo do Caminho Mais Curto (CMC): %d\n", distances[end]);
-    printf("Numero de vertices visitados: %d\n", steps);
-    printf("Tempo em %f segundos\n\n", ((double)t)/CLOCKS_PER_SEC);
-
-    
-    /* Mostra o CMC encontrado pelo algoritmo */
-
-    show_shortest_path_DJKT_A_star(g, parents, end, origin);
-}
-
-
-void rec_dfs_dijkstra(Graph *g, int origin, int *steps, int *visited, int *distances, int *parents)
-{
-    int i, neighbor_index, edge_cost, next_vertice;
-    int shortest_added_distance = INT_MAX;
-    visited[origin] = 1;  
-    (*steps)++;
-
-
-    for (i = 0; i < 4; i++)
-    {
-        neighbor_index = g->list_vert[origin]->neighbors[i];
-        
-        if (neighbor_index != -1 && visited[neighbor_index] == 0)
-        {
-            edge_cost = calculate_edge_cost(g->list_vert[neighbor_index]->info);
-
-            if (edge_cost + distances[origin] < distances[neighbor_index])
-            {
-                distances[neighbor_index] = edge_cost + distances[origin];
-                parents[neighbor_index] = origin;
-            }                
-        }        
-    } 
-
-
-    /* Descobre qual é a menor distancia acumulada até o momento */
-
-    for (i = 0; i < g->num_v; i++)
-    {
-        if (distances[i] < shortest_added_distance && visited[i] == 0)
-        {
-            shortest_added_distance = distances[i];
-            next_vertice = i;
-        }
-    }
-
-    /* Caso shortest_added_distance seja igual a INT_MAX, significa 
-        que todos os vértices 'furaram' a condição de visited[i] == 0 no 
-        for acima. Assim, todos eles já foram visitados, o que representa 
-        uma condição de parada para o algoritmo de Dijkstra
-    */
-    
-    if (shortest_added_distance != INT_MAX)
-        rec_dfs_dijkstra(g, next_vertice, steps, visited, distances, parents);          
+    int index = binary_search(vert, lst_shortest_path_vertices, lst_len);
+    return (index != -1) ? 1 : 0;    
 }
 
 
@@ -387,50 +275,148 @@ void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
 }
 
 
-int verify_vertice_neighborhood(Graph *g, int vert_index, int possible_neighbor)
+int calculate_edge_cost(char info)
 {
-    for (int i = 0; i < 4; i++)
-        if (g->list_vert[vert_index]->neighbors[i] == possible_neighbor)
-            return 1;
-    return 0;
+    if (info == 'M')
+        return 100;
+    
+    else if (info == 'R')
+        return 5;
+
+    else if (info == '.')
+        return 1;
+
+    else if (info == 'F' || info == 'I')
+        return 0;
+
+    else
+    {
+        printf("Mapa possui simbolos diferentes de 'M', 'R' e '.'");
+        exit(1);
+    }    
+} 
+
+
+void rec_dfs_dijkstra(Graph *g, int origin, int *steps, int *visited, int *distances, int *parents)
+{
+    int i, neighbor_index, edge_cost, next_vertice;
+    int shortest_added_distance = INT_MAX;
+    visited[origin] = 1;  
+    (*steps)++;
+
+
+    for (i = 0; i < 4; i++)
+    {
+        neighbor_index = g->list_vert[origin]->neighbors[i];
+        
+        if (neighbor_index != -1 && visited[neighbor_index] == 0)
+        {
+            edge_cost = calculate_edge_cost(g->list_vert[neighbor_index]->info);
+
+            if (edge_cost + distances[origin] < distances[neighbor_index])
+            {
+                distances[neighbor_index] = edge_cost + distances[origin];
+                parents[neighbor_index] = origin;
+            }                
+        }        
+    } 
+
+
+    /* Descobre qual é a menor distancia acumulada até o momento */
+
+    for (i = 0; i < g->num_v; i++)
+    {
+        if (distances[i] < shortest_added_distance && visited[i] == 0)
+        {
+            shortest_added_distance = distances[i];
+            next_vertice = i;
+        }
+    }
+
+    /* Caso shortest_added_distance seja igual a INT_MAX, significa 
+        que todos os vértices 'furaram' a condição de visited[i] == 0 no 
+        for acima. Assim, todos eles já foram visitados, o que representa 
+        uma condição de parada para o algoritmo de Dijkstra
+    */
+    
+    if (shortest_added_distance != INT_MAX)
+        rec_dfs_dijkstra(g, next_vertice, steps, visited, distances, parents);          
 }
 
 
-int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_len)
-{
-    //int index = linear_search(vert, lst_shortest_path_vertices, lst_len);
-    int index = binary_search(vert, lst_shortest_path_vertices, lst_len);
-    return (index != -1) ? 1 : 0;    
+void dijkstra_shortest_path(Graph *g)
+{   
+    /* Inicia a Contagem de Tempo da Execução da Função */
+
+    clock_t t = clock();
+
+    int origin, end;
+    int visited[g->num_v];
+    int distances[g->num_v];
+    int parents[g->num_v]; 
+    int steps = 0;
+
+
+    for (int i = 0; i < g->num_v; i++)
+    {
+        if (g->list_vert[i]->info == 'I') {  origin = i; }
+        else if (g->list_vert[i]->info == 'F') { end = i; }
+        distances[i] = INT_MAX;
+        visited[i] = 0;
+    }       
+    
+    distances[origin] = 0;
+    parents[origin] = -1;
+  
+
+    rec_dfs_dijkstra(g, origin, &steps, visited, distances, parents);
+
+
+    /* Calcula o tempo usado para encontrar o CMC */
+
+    t = clock() - t;
+
+    printf("\n================== Consegui rodar o Dijkstra!!! =====================\n");
+    printf("Custo do Caminho Mais Curto (CMC): %d\n", distances[end]);
+    printf("Numero de vertices visitados: %d\n", steps);
+    printf("Tempo em %f segundos\n\n", ((double)t)/CLOCKS_PER_SEC);
+
+    
+    /* Mostra o CMC encontrado pelo algoritmo */
+
+    show_shortest_path_DJKT_A_star(g, parents, end, origin);
 }
 
 
 
 
 
-
-
-
-int calculate_heuristic(int neighbor, int destiny)
+int calculate_heuristic(int neighbor, int destiny, int rows, int cols)
 {
+    int i, j;
+
     int coord[4]; /* neighbor_x, destiny_x, neighbor_y, destiny_y */
     int coord_complete = 0;
 
-    int matrix_aux[40][82];
-    int i, j;
-    int cont = 0;
+
 
     /* Cria matriz auxiliar para mapear os valores de neighbor e destiny
        e encontrar suas coordenadas, necessárias para o cálculo heurístico
     */
 
-    for (i = 0; i < 40; i++) 
-        for (j = 0; j < 82; j++)
+
+    int matrix_aux[40][82];
+    int cont = 0;
+
+    for (i = 0; i < rows; i++) 
+        for (j = 0; j < cols; j++)
             matrix_aux[i][j] = cont++;
+    
 
 
-    for (i = 0; i < 40; i++) 
+    for (i = 0; i < rows; i++) 
     {
-        for (j = 0; j < 82; j++)
+        for (j = 0; j < cols; j++)
         {
             if (coord_complete == 4) /* já encontrou tds as coordenadas necessárias */
                 break;
@@ -455,12 +441,17 @@ int calculate_heuristic(int neighbor, int destiny)
 }
 
 
-void rec_dfs_a_star(int origin, int end, Graph *g, int *steps, int *visited, int *distances, int *parents)
+
+
+void rec_dfs_a_star(Graph *g, int origin, int end, int *steps, int *visited, int *distances, int *parents)
 {
     int i, neighbor_index, g_n, h_n, next_vertice;
     int shortest_added_distance = INT_MAX;
     visited[origin] = 1;  
     (*steps)++;
+
+    int rows = get_matrix_rows(g->map_matrix);
+    int cols = get_matrix_cols(g->map_matrix);
 
 
     for (i = 0; i < 4; i++)
@@ -470,7 +461,7 @@ void rec_dfs_a_star(int origin, int end, Graph *g, int *steps, int *visited, int
         if (neighbor_index != -1 && visited[neighbor_index] == 0)
         {
             g_n = calculate_edge_cost(g->list_vert[neighbor_index]->info);
-            h_n = calculate_heuristic(neighbor_index, end);
+            h_n = calculate_heuristic(neighbor_index, end, rows, cols);
 
             if ((g_n + distances[origin]) + h_n < distances[neighbor_index])
             {
@@ -497,24 +488,26 @@ void rec_dfs_a_star(int origin, int end, Graph *g, int *steps, int *visited, int
        Caso contrário, segue adiante com a recursão */
     
     if (h_n != 0) 
-        rec_dfs_a_star(next_vertice, end, g, steps, visited, distances, parents);    
+        rec_dfs_a_star(g, next_vertice, end, steps, visited, distances, parents);    
 }
 
 
-void a_star_shortest_path(Graph *g, char matrix[40][82])
+
+
+void a_star_shortest_path(Graph *g)
 {
     /* Inicia a Contagem de Tempo da Execução da Função */
 
     clock_t t = clock();
 
-    int i, origin, end;
+    int origin, end;
     int visited[g->num_v];
     int distances[g->num_v];
     int parents[g->num_v]; 
     int steps = 0;
 
 
-    for (i = 0; i < g->num_v; i++)
+    for (int i = 0; i < g->num_v; i++)
     {
         if (g->list_vert[i]->info == 'I') {  origin = i; }
         else if (g->list_vert[i]->info == 'F') { end = i; }
@@ -526,7 +519,7 @@ void a_star_shortest_path(Graph *g, char matrix[40][82])
     parents[origin] = -1;
   
 
-    rec_dfs_a_star(origin, end, g, &steps, visited, distances, parents);
+    rec_dfs_a_star(g, origin, end, &steps, visited, distances, parents);
 
 
     /* Calcula o tempo usado para encontrar o CMC */
@@ -546,6 +539,17 @@ void a_star_shortest_path(Graph *g, char matrix[40][82])
 
 
 
+
+
+
+
+int verify_vertice_neighborhood(Graph *g, int vert_index, int possible_neighbor)
+{
+    for (int i = 0; i < 4; i++)
+        if (g->list_vert[vert_index]->neighbors[i] == possible_neighbor)
+            return 1;
+    return 0;
+}
 
 
 void show_shortest_path_FW(int **next_vert_matrix, int origin, int end, char matrix[40][82])

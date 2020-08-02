@@ -37,13 +37,13 @@ void do_everything(void)
 
     /* ======================= Algoritmo Dijkstra - Caminho Mais Curto ================= */
 
-    dijkstra_shortest_path(g);
+    //dijkstra_shortest_path(g);
     printf("\n\n");
 
 
     /* ========================== Algoritmo A* - Caminho Mais Curto ==================== */
 
-    //a_star_shortest_path(g, matrix);
+    a_star_shortest_path(g);
     printf("\n\n");
 
 

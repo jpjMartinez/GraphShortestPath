@@ -1,4 +1,4 @@
-#include <stdio.h>
+ #include <stdio.h>
 #include <stdlib.h>
 #include "map_matrix.h"
 
@@ -28,7 +28,7 @@ char **create_matrix(int *rows, int *cols, char *map_file)
 {
     FILE *map;
     char ch;
-    char **map_matrix;
+    char **matrix;
     int i, j;
 
     *rows = 0; *cols = 0;
@@ -57,13 +57,13 @@ char **create_matrix(int *rows, int *cols, char *map_file)
 
     /* Controi a matriz que representa o mapa */
 
-    map_matrix = (char **) malloc((*rows) * sizeof(char *)); // vet ponteiros char 
-    if (map_matrix == NULL) { exit(1); }
+    matrix = (char **) malloc((*rows) * sizeof(char *)); // vet ponteiros char 
+    if (matrix == NULL) { exit(1); }
 
     for (i = 0; i < (*rows); i++)
     {
-        map_matrix[i] = (char *) malloc((*cols) * sizeof(char));
-        if (map_matrix[i] == NULL) { exit(1); }
+        matrix[i] = (char *) malloc((*cols) * sizeof(char));
+        if (matrix[i] == NULL) { exit(1); }
     }
     
 
@@ -80,14 +80,14 @@ char **create_matrix(int *rows, int *cols, char *map_file)
             if (ch == '\n')
                 ch = fgetc(map);
             
-            map_matrix[i][j] = ch;
+            matrix[i][j] = ch;
         }
             
     fclose(map);
     
 
 
-    return map_matrix;
+    return matrix;
 }
 
 
