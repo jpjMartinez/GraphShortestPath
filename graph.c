@@ -388,59 +388,44 @@ void dijkstra_shortest_path(Graph *g)
 }
 
 
-
-
-
-int calculate_heuristic(int neighbor, int destiny, int rows, int cols)
-{
-    int i, j;
+int calculate_heuristic(int neighbor, int destiny, int rows, int cols, int **matrix_aux)
+{    
+    /* Usa a matriz auxiliar e mapeia os valores de neighbor e destiny,
+       encontrando as coordenadas necessárias para o cálculo heurístico
+    */
 
     int coord[4]; /* neighbor_x, destiny_x, neighbor_y, destiny_y */
     int coord_complete = 0;
 
 
-
-    /* Cria matriz auxiliar para mapear os valores de neighbor e destiny
-       e encontrar suas coordenadas, necessárias para o cálculo heurístico
-    */
-
-
-    int matrix_aux[40][82];
-    int cont = 0;
-
-    for (i = 0; i < rows; i++) 
-        for (j = 0; j < cols; j++)
-            matrix_aux[i][j] = cont++;
-    
-
-
-    for (i = 0; i < rows; i++) 
+    for (int i = 0; i < rows; i++) 
     {
-        for (j = 0; j < cols; j++)
+        if (coord_complete == 4) // já encontrou tds as coordenadas necessárias
+            break;
+
+        for (int j = 0; j < cols; j++)
         {
-            if (coord_complete == 4) /* já encontrou tds as coordenadas necessárias */
+            if (coord_complete == 4) // já encontrou tds as coordenadas necessárias
                 break;
 
             if (matrix_aux[i][j] == neighbor)
             {
-                coord[0] = i; /* neighbor_x */
-                coord[2] = j; /* neighbor_y */
-                coord_complete++; coord_complete++;
+                coord[0] = i; // neighbor_x 
+                coord[2] = j; // neighbor_y 
+                coord_complete += 2;
             }
 
             else if (matrix_aux[i][j] == destiny)
             {
-                coord[1] = i; /* destiny_x */
-                coord[3] = j; /* destiny_y */
-                coord_complete++; coord_complete++;
+                coord[1] = i; // destiny_x 
+                coord[3] = j; // destiny_y 
+                coord_complete += 2;
             }
         }
     }
 
     return abs(coord[0] - coord[1]) + abs(coord[2] - coord[3]);
 }
-
-
 
 
 void rec_dfs_a_star(Graph *g, int origin, int end, int *steps, int *visited, int *distances, int *parents)
@@ -452,6 +437,7 @@ void rec_dfs_a_star(Graph *g, int origin, int end, int *steps, int *visited, int
 
     int rows = get_matrix_rows(g->map_matrix);
     int cols = get_matrix_cols(g->map_matrix);
+    int **matrix_aux = get_matrix_aux(g->map_matrix);
 
 
     for (i = 0; i < 4; i++)
@@ -461,37 +447,34 @@ void rec_dfs_a_star(Graph *g, int origin, int end, int *steps, int *visited, int
         if (neighbor_index != -1 && visited[neighbor_index] == 0)
         {
             g_n = calculate_edge_cost(g->list_vert[neighbor_index]->info);
-            h_n = calculate_heuristic(neighbor_index, end, rows, cols);
-
+            h_n = calculate_heuristic(neighbor_index, end, rows, cols, matrix_aux);
+            
             if ((g_n + distances[origin]) + h_n < distances[neighbor_index])
             {
                 distances[neighbor_index] = g_n + distances[origin];
                 parents[neighbor_index] = origin;
             }                
         }        
-    } 
+    }
 
 
     /* Descobre qual é a menor distancia acumulada até o momento */
 
     for (i = 0; i < g->num_v; i++)
-    {
         if (distances[i] < shortest_added_distance && visited[i] == 0)
         {
             shortest_added_distance = distances[i];
             next_vertice = i;
         }
-    }
 
-
-    /* Se a heurística der 0, então o destino já foi alcançado.
+    
+    /* Se ja visitou todos os vertices, então o destino já foi alcançado.
        Caso contrário, segue adiante com a recursão */
     
-    if (h_n != 0) 
+    if ((*steps) != g->num_v)
         rec_dfs_a_star(g, next_vertice, end, steps, visited, distances, parents);    
+          
 }
-
-
 
 
 void a_star_shortest_path(Graph *g)
@@ -520,7 +503,9 @@ void a_star_shortest_path(Graph *g)
   
 
     rec_dfs_a_star(g, origin, end, &steps, visited, distances, parents);
-
+    
+    //APAGA ESSE return DEPOIS, POIS SERVE APENAS P/ TESTAR calculate_heuristic()
+    //return;
 
     /* Calcula o tempo usado para encontrar o CMC */
 

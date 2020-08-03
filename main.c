@@ -37,7 +37,7 @@ void do_everything(void)
 
     /* ======================= Algoritmo Dijkstra - Caminho Mais Curto ================= */
 
-    //dijkstra_shortest_path(g);
+    dijkstra_shortest_path(g);
     printf("\n\n");
 
 
@@ -46,7 +46,7 @@ void do_everything(void)
     a_star_shortest_path(g);
     printf("\n\n");
 
-
+  
     /* ==================== Algoritmo Floyd-Warshall - Caminho Mais Curto ============== */
 
     //floyd_warshall_shortest_path(g, matrix);
