@@ -63,7 +63,7 @@ void do_everything(void)
 int main (void)
 {
     do_everything();
-    
+
     printf("hello world\n");
 
     return 0;

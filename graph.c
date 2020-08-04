@@ -21,7 +21,18 @@ struct vertice
     int neighbors[4]; /* cima, baixo, esq, dir */
 };
 
+/* 
+Objetivo: 
+    Criar um grafo com base em um "mapa", arquivo 
+    de texto, em que cada caracter representa um vertice do grafo
+    
+Parametros: 
+    -map_file: arquivo .txt com o mapa de vertices para 
+    construir o grafo
 
+Retornos:
+    -g: endereço do grafo criado       
+*/
 Graph * create_graph(char *map_file)
 {
     Graph *g = (Graph *) malloc(sizeof(Graph));   
@@ -47,7 +58,16 @@ Graph * create_graph(char *map_file)
     return g;
 }
 
+/* 
+Objetivo: 
+    Liberar um grafo
+    
+Parametros: 
+    -g: grafo a ser liberado
 
+Retornos:
+    Nenhum       
+*/
 void free_graph(Graph *g)
 {
     for (int i = 0; i < g->num_v; i++) // libera cada vértice e suas adjacencias
@@ -63,6 +83,7 @@ void free_graph(Graph *g)
 
 Vert * create_vertice(char info)
 {
+
     Vert *v = (Vert *) malloc(sizeof(Vert));   
     if (v == NULL) { exit(1); }
 
@@ -80,7 +101,17 @@ void free_vertice(Vert *v)
     free(v);
 }
 
+/* 
+Objetivo: 
+    Definir as conexões de cada um dos vertices do grafo
+    (cima, baixo, esquerda, direita)
+    
+Parametros: 
+    -g: grafo que precisa interligar seus vertices
 
+Retornos:
+    Nenhum     
+*/
 void insert_vertices_neighbors(Graph *g)
 {
     int j, k;    
@@ -123,7 +154,18 @@ void insert_vertices_neighbors(Graph *g)
     }
 }
 
+/* 
+Objetivo: 
+    Mostrar todas as conexoes de cada um dos vertices do grafo.
+    Portanto, eh mostrado o endereco alocado para o vertice 
+    e os enderecos de seus vizinhos (cima, baixo, esquerda e direita)
 
+Parametros: 
+    -g: grafo que se deseja mostrar tais informacoes de cada vertice
+
+Retornos:
+    Nenhum    
+*/
 void show_graph_vertices(Graph *g)
 {
     int i, j, index_neighbor;
@@ -148,7 +190,18 @@ void show_graph_vertices(Graph *g)
     }
 }
 
+/* 
+Objetivo: 
+    Verificar se a quantidadae de conexões feitas entre os vertices eh 
+    igual ao esperado da visao conceitual do "mapa" de vertices
+    
+Parametros: 
+    -g: grafo ao qual deve ser feita a verificacao
 
+Retornos:
+    1: caso passe na verificacao
+    0: caso contrário      
+*/
 int verify_graph_edges_amount(Graph *g)
 {
     int rows, cols;
@@ -413,7 +466,20 @@ void rec_dfs_dijkstra(Graph *g, int origin, int *steps, int *visited, int *dista
         rec_dfs_dijkstra(g, next_vertice, steps, visited, distances, parents);          
 }
 
+/* 
+Objetivo: 
+    Calcular e exibir o caminho mais curto (Shortest Path), entre uma 
+    "origem" e um "destino" fazendo uso do algoritmo de Dijkstra
+    
+    "origem": simbolo "I" no mapa de vertices,
+    "destino": simbolo "F" no mapa de vertices
+    
+Parametros: 
+    -g: grafo que possui os vertices "origem" e "destino"
 
+Retornos:
+    Nenhum       
+*/
 void dijkstra_shortest_path(Graph *g)
 {   
     /* Inicia a Contagem de Tempo da Execução da Função */
@@ -546,7 +612,20 @@ void rec_dfs_a_star(Graph *g, int origin, int end, int *steps, int *visited, int
           
 }
 
+/* 
+Objetivo: 
+    Calcular e exibir o caminho mais curto (Shortest Path), entre uma 
+    "origem" e um "destino" fazendo uso do algoritmo A* (star)
+    
+    "origem": simbolo "I" no mapa de vertices,
+    "destino": simbolo "F" no mapa de vertices
+    
+Parametros: 
+    -g: grafo que possui os vertices "origem" e "destino"
 
+Retornos:
+    Nenhum       
+*/
 void a_star_shortest_path(Graph *g)
 {
     /* Inicia a Contagem de Tempo da Execução da Função */
@@ -602,7 +681,20 @@ int verify_vertice_neighborhood(Graph *g, int vert_index, int possible_neighbor)
     return (index != -1) ? 1 : 0;
 }
 
+/* 
+Objetivo: 
+    Calcular e exibir o caminho mais curto (Shortest Path), entre uma 
+    "origem" e um "destino" fazendo uso do algoritmo de Floyd-Wharshall
+    
+    "origem": simbolo "I" no mapa de vertices,
+    "destino": simbolo "F" no mapa de vertices
+    
+Parametros: 
+    -g: grafo que possui os vertices "origem" e "destino"
 
+Retornos:
+    Nenhum       
+*/
 void floyd_warshall_shortest_path(Graph *g)
 {
     /* Inicia a Contagem de Tempo da Execução da Função */

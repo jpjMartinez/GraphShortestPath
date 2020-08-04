@@ -11,7 +11,20 @@ struct map_matrix
     int cols;
 };
 
+/* 
+Objetivo: 
+    Criar uma (matrix) que possa guardar as informacoes relevantes ao mapa
+    de vertices pertencentes a um grafo (simbolos/custos de trajetoria)
+    assim como dimensões do mapa-matrix (rows, cols) e também o mapeamento 
+    de cada vertice com um id numério (matrix_aux)
+    
+Parametros: 
+    -map_file: arquivo .txt que contem todos os simbolos para 
+    o mapeamento de vertices
 
+Retornos:
+    -map_matrix: endereco do mapa-matrix       
+*/
 MapMatrix *create_map_matrix(char *map_file)
 {
     MapMatrix *map_matrix = (MapMatrix *) malloc(sizeof(MapMatrix));
@@ -121,6 +134,18 @@ int **create_matrix_aux(int *rows, int *cols)
 }
 
 
+/* 
+Objetivo: 
+    Liberar um mapa-matrix da memoria por completo, incluindo 
+    a liberacao da matrix de simbolos/custos (matrix) e a liberacao
+    da matrix de indices dos vertices (matrix_aux)
+
+Parametros: 
+    -map_matrix: matrix que deve ser liberada
+
+Retornos:
+    Nenhum       
+*/
 void free_map_matrix(MapMatrix *map_matrix)
 {
     for (int i = 0; i < map_matrix->rows; i++) 
@@ -150,25 +175,69 @@ void print_map_matrix(MapMatrix *map_matrix)
         }
 }
 
+/* 
+Objetivo: 
+    Manter o encapsulamento do campo "rows" de MapMatrix e 
+    ainda assim poder disponibiliza-lo para outros modulos
+    
+Parametros: 
+    -map_matrix: mapa-matrix cujo deseja-se obter a quantidade
+    de linhas dessa matriz
 
+Retornos:
+    -quantidade de linhas (rows) da map_matrix recebida
+*/
 int get_matrix_rows(MapMatrix *map_matrix)
 {
     return map_matrix->rows;
 }
 
+/* 
+Objetivo: 
+    Manter o encapsulamento do campo "cols" de MapMatrix e 
+    ainda assim poder disponibiliza-lo para outros modulos
+    
+Parametros: 
+    -map_matrix: mapa-matrix cujo deseja-se obter a quantidade
+    de colunas dessa matriz
 
+Retornos:
+    -quantidade de linhas (cols) da map_matrix recebida
+*/
 int get_matrix_cols(MapMatrix *map_matrix)
 {
     return map_matrix->cols;
 }
 
+/* 
+Objetivo: 
+    Manter o encapsulamento do campo "matrix" de MapMatrix e 
+    ainda assim poder disponibiliza-lo para outros modulos
+    
+Parametros: 
+    -map_matrix: mapa-matrix cujo deseja-se obter a quantidade
+    de matriz de simbolos/custos de vertices
 
+Retornos:
+    -matriz de simbolos/custos de vertices da map_matrix recebida
+*/
 char **get_matrix(MapMatrix *map_matrix)
 {
     return map_matrix->matrix;
 }
 
+/* 
+Objetivo: 
+    Manter o encapsulamento do campo "matrix_aux" de MapMatrix e 
+    ainda assim poder disponibiliza-lo para outros modulos
+    
+Parametros: 
+    -map_matrix: mapa-matrix cujo deseja-se obter a matriz de indices
+    de vertices
 
+Retornos:
+    -matriz de indices de vertice da map_matrix recebida
+*/
 int **get_matrix_aux(MapMatrix *map_matrix)
 {
     return map_matrix->matrix_aux;
