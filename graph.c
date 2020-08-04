@@ -3,7 +3,6 @@
 #include <limits.h>
 #include <time.h>
 #include "graph.h"
-#include "fila.h"
 #include "map_matrix.h"
 #include "algorithms.h"
 
@@ -189,14 +188,50 @@ int is_a_shortest_path_vert(int vert, int *lst_shortest_path_vertices, int lst_l
 }
 
 
+void print_map_and_shortest_path(Graph *g, int *lst, int len_lst, Fila *f)
+{
+    int rows = get_matrix_rows(g->map_matrix);
+    int cols = get_matrix_cols(g->map_matrix);
+
+    char **matrix = get_matrix(g->map_matrix);
+    int **matrix_aux = get_matrix_aux(g->map_matrix);       
+
+
+    printf("==================== CAMINHO PERCORRIDO =====================\n");
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+        {
+            /* Mostra '_' para os Vértices Percorridos */
+
+            if (is_a_shortest_path_vert(matrix_aux[i][j], lst, len_lst)) 
+            {
+                if (j + 1 == cols)
+                    printf("_ \n");
+                else
+                    printf("_ ");
+
+                remove_fila(f);
+            }
+
+
+            /* Mostra o simbolo normal dos Vértices Não Percorridos */
+
+            else 
+            {
+                if (j + 1 == cols)
+                    printf("%c \n", matrix[i][j]);
+                else
+                    printf("%c ", matrix[i][j]);                
+            }
+        }
+}
+
+
 void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
 {
-    int cont, parent, lst_parents_len, vertice, rows, cols;
-    int *lst_parents;
+    int cont, parent, lst_parents_len, *lst_parents;
 
-    rows = get_matrix_rows(g->map_matrix);
-    cols = get_matrix_cols(g->map_matrix);
-    
 
     /* Descobre quem são os parentes e coloca eles em fila */
 
@@ -221,13 +256,13 @@ void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
     if (lst_parents == NULL) { exit(1); }
     lst_parents_len = cont;
 
+
+    /* Preenche o vetor lst_parents */
+
     cont = 0; 
     
-    while (!fila_is_empty(f)) /* Preenche o vetor lst_parents */
-    {
-        lst_parents[cont] = remove_fila(f);
-        cont++;
-    }
+    while (!fila_is_empty(f)) 
+        lst_parents[cont++] = remove_fila(f);    
 
 
     /* Coloca os elementos do vetor em ordem crescente */
@@ -235,40 +270,75 @@ void show_shortest_path_DJKT_A_star(Graph *g, int *parents, int end, int origin)
     quick_sort(lst_parents, 0, lst_parents_len-1);
 
 
-    printf("==================== CAMINHO PERCORRIDO =====================\n");
+    /* Mostra na tela o mapa original com o Caminho Mais Curto percorrido */
 
-    for (int i = 0; i < rows; i++)
-        for (int j = 0; j < cols; j++)
-        {
-            vertice = get_matrix_aux(g->map_matrix)[i][j];
-
-            // Mostra X para os Vértices Percorridos
-
-            if (is_a_shortest_path_vert(vertice, lst_parents, lst_parents_len)) 
-            {
-                if (j + 1 == cols)
-                    printf("_ \n");
-                else
-                    printf("_ ");
-
-                remove_fila(f);
-            }
-
-            else // Mostra o simbolo normal dos Vértices Não Percorridos 
-            {
-                vertice = get_matrix(g->map_matrix)[i][j];
-
-                if (j + 1 == cols)
-                    printf("%c \n", vertice);
-                else
-                    printf("%c ", vertice);                
-            }
-        }       
+    print_map_and_shortest_path(g, lst_parents, lst_parents_len, f);
 
 
-    /* libera o espaço alocado anteriormente para a 
-       fila e lista de 'parents'  
+    /* Libera o espaço alocado anteriormente para a fila e lista de 'parents' */
+
+    free_fila(f);
+    free(lst_parents);
+}
+
+
+void show_shortest_path_FW(Graph *g, int **next_vert_matrix, int origin, int end)
+{ 
+    if (next_vert_matrix[origin][end] == -1) 
+        return ;
+              
+    int cont, lst_parents_len, *lst_parents;
+
+
+    /* Insere na fila os vértices (parents) serão usados pra construir o CMC */
+    
+    Fila *f = create_fila();
+    cont = 0;
+
+    /* Não inseri a origem de propósito, pois queria mostar o 'I' como 
+        vértice inicial do CMC percorrido
     */
+
+    while (origin != end) 
+    { 
+        origin = next_vert_matrix[origin][end]; 
+
+        /* Fiz isso, pois queria mostrar o 'F' como vértice final do CMC percorrido */
+
+        if (origin == end) 
+            break;
+
+        insert_fila(f, origin);
+        cont++;
+    }
+
+
+    /* Aloca um vetor apenas para os parentes que foram enfileirados anteriormente */
+
+    lst_parents = (int *) malloc(cont * sizeof(int)); 
+    if (lst_parents == NULL) { exit(1); }
+    lst_parents_len = cont;
+
+
+    /* Preenche o vetor lst_parents */
+
+    cont = 0; 
+    
+    while (!fila_is_empty(f))  
+        lst_parents[cont++] = remove_fila(f);
+
+
+    /* Coloca os elementos do vetor em ordem crescente */
+
+    quick_sort(lst_parents, 0, lst_parents_len-1);    
+
+
+    /* Mostra na tela o mapa original com o Caminho Mais Curto percorrido */
+
+    print_map_and_shortest_path(g, lst_parents, lst_parents_len, f);
+
+
+    /* Libera o espaço alocado anteriormente para a fila e lista de 'parents'  */
 
     free_fila(f);
     free(lst_parents);
@@ -523,119 +593,23 @@ void a_star_shortest_path(Graph *g)
 }
 
 
-
-
-
-
-
 int verify_vertice_neighborhood(Graph *g, int vert_index, int possible_neighbor)
-{
-    for (int i = 0; i < 4; i++)
-        if (g->list_vert[vert_index]->neighbors[i] == possible_neighbor)
-            return 1;
-    return 0;
+{  
+    int *lst_neighbors = g->list_vert[vert_index]->neighbors;
+
+    int index = linear_search(possible_neighbor, lst_neighbors, 4);
+
+    return (index != -1) ? 1 : 0;
 }
 
 
-void show_shortest_path_FW(int **next_vert_matrix, int origin, int end, char matrix[40][82])
-{ 
-    if (next_vert_matrix[origin][end] == -1) 
-        return ;
-              
-
-    int *lst_parents;
-    int lst_parents_len, i, j;
-    int matrix_aux[40][82];
-    int cont = 0;
-
-
-    /* Preenche matriz auxiliar com numeros de 0 à 3279
-       para mapear os elementos percorridos no CMC
-    */
-
-    for (i = 0; i < 40; i++)
-        for (j = 0; j < 82; j++)
-            matrix_aux[i][j] = cont++;
-
-
-    /* Insere na fila os vértices (parents) serão usados pra construir o CMC */
-    
-    Fila *f = create_fila();
-
-    /* Não inseri a origem de propósito, pois queria mostar o 'I' como 
-        vértice inicial do CMC percorrido
-    */
-
-    while (origin != end) 
-    { 
-        origin = next_vert_matrix[origin][end]; 
-
-        /* Fiz isso, pois queria mostrar o 'F' como vértice final do CMC percorrido */        
-        if (origin == end) { break; }
-
-        insert_fila(f, origin);
-        cont++;
-    }
-
-
-    /* Aloca um vetor apenas para os parentes que foram 
-       enfileirados anteriormente
-    */
-
-    lst_parents = (int *) malloc(cont * sizeof(int)); 
-    if (lst_parents == NULL) { exit(1); }
-    lst_parents_len = cont;
-
-    cont = 0; 
-    
-    while (!fila_is_empty(f)) /* Preenche o vetor lst_parents */
-    {
-        lst_parents[cont] = remove_fila(f);
-        cont++;
-    }
-
-
-    printf("==================== CAMINHO PERCORRIDO =====================\n");
-
-    for (i = 0; i < 40; i++)
-    {
-        for (j = 0; j < 82; j++)
-        {
-            if (is_a_shortest_path_vert(matrix_aux[i][j], lst_parents, lst_parents_len)) // Mostra X para os Vértices Percorridos
-            {
-                if (j + 1 == 82)
-                    printf("_ \n");
-                else
-                    printf("_ ");
-
-                remove_fila(f);
-            }
-
-            else // Mostra o simbolo normal dos Vértices Não Percorridos 
-            {
-                if (j + 1 == 82)
-                    printf("%c \n", matrix[i][j]);
-                else
-                    printf("%c ", matrix[i][j]);                
-            }
-        }
-    }   
-
-
-    /* libera o espaço alocado anteriormente para a fila e lista de 'parents'  */
-    free_fila(f);
-    free(lst_parents);
-}
-
-
-void floyd_warshall_shortest_path(Graph *g, char matrix[40][82])
+void floyd_warshall_shortest_path(Graph *g)
 {
     /* Inicia a Contagem de Tempo da Execução da Função */
 
     clock_t t = clock();
 
     int **dist_matrix, **next_vert_matrix;
-    int *dist_matrix_column, *next_vert_matrix_column;
     int i, j, k, origin, end;
     float steps = 0;
 
@@ -647,22 +621,18 @@ void floyd_warshall_shortest_path(Graph *g, char matrix[40][82])
 
     for (i = 0; i < g->num_v; i++)
     {
-        dist_matrix_column = (int *) malloc(g->num_v * sizeof(int));
-        next_vert_matrix_column = (int *) malloc(g->num_v * sizeof(int));
-        if (dist_matrix_column == NULL || next_vert_matrix_column == NULL) { exit(1); }
-
-        dist_matrix[i] = dist_matrix_column;
-        next_vert_matrix[i] = next_vert_matrix_column;
+        dist_matrix[i] = (int *) malloc(g->num_v * sizeof(int));
+        next_vert_matrix[i]  = (int *) malloc(g->num_v * sizeof(int));
+        if (dist_matrix[i] == NULL || next_vert_matrix[i] == NULL) { exit(1); }
     }
         
 
     /* Converte a Lista de Adjacencias em uma Matriz de Adjacencias-Distancias 
        Ao mesmo tempo preenche a matriz auxiliar next_vert_matrix para dps recuperar
-       os nós percorrido no CMC
+       os nós percorridos no CMC
     */
     
     for (i = 0; i < g->num_v; i++)
-    {
         for (j = 0; j < g->num_v; j++)
         {
             if (i == j)
@@ -682,16 +652,16 @@ void floyd_warshall_shortest_path(Graph *g, char matrix[40][82])
                 dist_matrix[i][j] = INT_MAX;     
                 next_vert_matrix[i][j] = -1;
             }                       
-        }
-    }           
+        }        
 
 
     /* Atualiza as distancias minimas de pares de nó (i,j) 
         com relação aos 1,2..k-1 vértices do grafo */
 
+    
     for (k = 0; k < g->num_v; k++) 
         for (i = 0; i < g->num_v; i++) 
-            for (j = 0; j < g->num_v; j++) 
+            for (j = 0; j < g->num_v; j++)
                 if (dist_matrix[i][k] != INT_MAX && dist_matrix[k][j] != INT_MAX && 
                     dist_matrix[i][k] + dist_matrix[k][j] < dist_matrix[i][j]) 
                     {
@@ -699,14 +669,14 @@ void floyd_warshall_shortest_path(Graph *g, char matrix[40][82])
                         next_vert_matrix[i][j] = next_vert_matrix[i][k];
                         steps++;
                     }
-                    
+    
 
     /* Calcula o tempo usado para encontrar o CMC */
 
     t = clock() - t;
 
 
-    for (i = 0; i < g->num_v; i++) /* Encontra a origem e o destino */
+    for (i = 0; i < g->num_v; i++) // Encontra a origem e o destino 
     {
         if (g->list_vert[i]->info == 'I') {  origin = i; }
         else if (g->list_vert[i]->info == 'F') { end = i; }
@@ -720,7 +690,7 @@ void floyd_warshall_shortest_path(Graph *g, char matrix[40][82])
 
     /* Mostra caminho mais curto */
 
-    show_shortest_path_FW(next_vert_matrix, origin, end, matrix);
+    show_shortest_path_FW(g, next_vert_matrix, origin, end);
 
 
 

@@ -49,7 +49,7 @@ void do_everything(void)
   
     /* ==================== Algoritmo Floyd-Warshall - Caminho Mais Curto ============== */
 
-    //floyd_warshall_shortest_path(g, matrix);
+    floyd_warshall_shortest_path(g);
     printf("\n\n");
 
 
